@@ -26,11 +26,8 @@ cp "$BUILD_DIR/RedisAssistant" "$PACKAGE_DIR/$PACKAGE_NAME/"
 
 # Copy dependencies
 echo "Copying dependencies..."
-ldd "$BUILD_DIR/RedisAssistant" | grep "=> /" | awk '{print $3}' | while read lib; do
-    # Only copy non-system libraries
-    if [[ "$lib" == *"libwx"* ]] || [[ "$lib" == *"hiredis"* ]]; then
-        cp "$lib" "$PACKAGE_DIR/$PACKAGE_NAME/" 2>/dev/null || true
-    fi
+ldd "$BUILD_DIR/RedisAssistant" | grep "=> /" | grep -E "libwx|hiredis" | awk '{print $3}' | while read lib; do
+    cp "$lib" "$PACKAGE_DIR/$PACKAGE_NAME/" 2>/dev/null || true
 done
 
 # Create launcher script from template

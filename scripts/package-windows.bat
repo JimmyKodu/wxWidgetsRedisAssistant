@@ -49,15 +49,16 @@ if exist "%VCPKG_BIN%" (
 )
 
 REM Copy Visual C++ Runtime (if needed)
+echo Looking for Visual C++ Runtime...
 for %%R in (vcruntime140.dll msvcp140.dll) do (
     where %%R >nul 2>&1
-    if !errorlevel! equ 0 (
+    if not errorlevel 1 (
         for /f "delims=" %%P in ('where %%R') do (
             copy "%%P" "%PACKAGE_DIR%\%PACKAGE_NAME%\" >nul 2>&1
-            goto :found_%%R
+            goto :next_runtime
         )
     )
-    :found_%%R
+    :next_runtime
 )
 
 REM Create README
