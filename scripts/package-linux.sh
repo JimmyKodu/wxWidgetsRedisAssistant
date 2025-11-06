@@ -33,13 +33,8 @@ ldd "$BUILD_DIR/RedisAssistant" | grep "=> /" | awk '{print $3}' | while read li
     fi
 done
 
-# Create launcher script
-cat > "$PACKAGE_DIR/$PACKAGE_NAME/run.sh" << 'EOF'
-#!/bin/bash
-DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export LD_LIBRARY_PATH="$DIR:$LD_LIBRARY_PATH"
-"$DIR/RedisAssistant" "$@"
-EOF
+# Create launcher script from template
+cp scripts/run.sh.template "$PACKAGE_DIR/$PACKAGE_NAME/run.sh"
 chmod +x "$PACKAGE_DIR/$PACKAGE_NAME/run.sh"
 
 # Create README

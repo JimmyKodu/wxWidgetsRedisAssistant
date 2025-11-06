@@ -31,10 +31,20 @@ copy "%BUILD_DIR%\Release\RedisAssistant.exe" "%PACKAGE_DIR%\%PACKAGE_NAME%\"
 
 REM Copy dependencies (wxWidgets DLLs and hiredis)
 echo Copying dependencies...
-REM You may need to adjust these paths based on your system
-for %%D in (wxmsw32u_core_vc_x64_custom.dll wxbase32u_vc_x64_custom.dll hiredis.dll) do (
-    if exist "C:\wxWidgets\lib\vc_x64_dll\%%D" (
-        copy "C:\wxWidgets\lib\vc_x64_dll\%%D" "%PACKAGE_DIR%\%PACKAGE_NAME%\"
+REM Try vcpkg path first (CI builds)
+set VCPKG_BIN=vcpkg\installed\x64-windows\bin
+if exist "%VCPKG_BIN%" (
+    echo Using vcpkg dependencies from %VCPKG_BIN%
+    for %%D in ("%VCPKG_BIN%\*.dll") do (
+        copy "%%D" "%PACKAGE_DIR%\%PACKAGE_NAME%\"
+    )
+) else (
+    REM Fallback to manual wxWidgets installation
+    echo Looking for manual wxWidgets installation...
+    for %%D in (wxmsw32u_core_vc_x64_custom.dll wxbase32u_vc_x64_custom.dll hiredis.dll) do (
+        if exist "C:\wxWidgets\lib\vc_x64_dll\%%D" (
+            copy "C:\wxWidgets\lib\vc_x64_dll\%%D" "%PACKAGE_DIR%\%PACKAGE_NAME%\"
+        )
     )
 )
 
