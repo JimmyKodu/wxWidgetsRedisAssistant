@@ -124,7 +124,13 @@ void RedisFrame::OnConnect(wxCommandEvent& event)
     else
     {
         UpdateStatus("Connection failed");
-        wxMessageBox("Failed to connect to Redis server", "Error", wxOK | wxICON_ERROR);
+        std::string error = m_redisClient->GetLastError();
+        wxString errorMsg = "Failed to connect to Redis server";
+        if (!error.empty())
+        {
+            errorMsg += ":\n" + wxString::FromUTF8(error);
+        }
+        wxMessageBox(errorMsg, "Error", wxOK | wxICON_ERROR);
     }
 }
 
@@ -234,7 +240,15 @@ void RedisFrame::OnKeys(wxCommandEvent& event)
         for (size_t i = 0; i < keys.size(); ++i)
         {
             long index = m_keysList->InsertItem(i, wxString::FromUTF8(keys[i]));
-            m_keysList->SetItem(index, 1, "string");
+            std::string keyType;
+            if (m_redisClient->GetType(keys[i], keyType))
+            {
+                m_keysList->SetItem(index, 1, wxString::FromUTF8(keyType));
+            }
+            else
+            {
+                m_keysList->SetItem(index, 1, "unknown");
+            }
         }
         UpdateStatus(wxString::Format("Found %zu keys", keys.size()));
     }

@@ -64,11 +64,9 @@ echo.
 echo For more information, visit: https://github.com/JimmyKodu/wxWidgetsRedisAssistant
 ) > "%PACKAGE_DIR%\%PACKAGE_NAME%\README.txt"
 
-REM Create archive using tar (available in Windows 10+)
-cd "%PACKAGE_DIR%"
-tar -czf "%PACKAGE_NAME%.tar.gz" "%PACKAGE_NAME%"
-cd ..\..\..
+REM Create ZIP archive using PowerShell
+powershell -Command "Compress-Archive -Path '%PACKAGE_DIR%\%PACKAGE_NAME%' -DestinationPath '%PACKAGE_DIR%\%PACKAGE_NAME%.zip' -Force"
 
-echo Windows package created: %PACKAGE_DIR%\%PACKAGE_NAME%.tar.gz
+echo Windows package created: %PACKAGE_DIR%\%PACKAGE_NAME%.zip
 
 endlocal

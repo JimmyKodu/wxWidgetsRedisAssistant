@@ -18,13 +18,19 @@ bool RedisClient::Connect(const std::string& host, int port, const std::string& 
         Disconnect();
     }
     
+    m_lastError.clear();
     m_context = redisConnect(host.c_str(), port);
     if (m_context == nullptr || m_context->err)
     {
         if (m_context)
         {
+            m_lastError = std::string(m_context->errstr);
             redisFree(m_context);
             m_context = nullptr;
+        }
+        else
+        {
+            m_lastError = "Failed to allocate redis context";
         }
         return false;
     }
@@ -35,7 +41,15 @@ bool RedisClient::Connect(const std::string& host, int port, const std::string& 
         redisReply* reply = (redisReply*)redisCommand(m_context, "AUTH %s", password.c_str());
         if (reply == nullptr || reply->type == REDIS_REPLY_ERROR)
         {
-            if (reply) freeReplyObject(reply);
+            if (reply)
+            {
+                m_lastError = std::string(reply->str);
+                freeReplyObject(reply);
+            }
+            else
+            {
+                m_lastError = "Authentication command failed";
+            }
             redisFree(m_context);
             m_context = nullptr;
             return false;
@@ -60,6 +74,11 @@ void RedisClient::Disconnect()
 bool RedisClient::IsConnected() const
 {
     return m_connected;
+}
+
+std::string RedisClient::GetLastError() const
+{
+    return m_lastError;
 }
 
 bool RedisClient::Get(const std::string& key, std::string& value)
@@ -139,6 +158,26 @@ bool RedisClient::Keys(const std::string& pattern, std::vector<std::string>& key
                 keys.push_back(std::string(reply->element[i]->str, reply->element[i]->len));
             }
         }
+        success = true;
+    }
+    
+    freeReplyObject(reply);
+    return success;
+}
+
+bool RedisClient::GetType(const std::string& key, std::string& type)
+{
+    if (!m_connected || !m_context)
+        return false;
+    
+    redisReply* reply = (redisReply*)redisCommand(m_context, "TYPE %s", key.c_str());
+    if (reply == nullptr)
+        return false;
+    
+    bool success = false;
+    if (reply->type == REDIS_REPLY_STATUS)
+    {
+        type = std::string(reply->str, reply->len);
         success = true;
     }
     
