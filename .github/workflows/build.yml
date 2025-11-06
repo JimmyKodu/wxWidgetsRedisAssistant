@@ -20,7 +20,7 @@ jobs:
       contents: read
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Install dependencies
       run: |
@@ -74,7 +74,7 @@ jobs:
         tar -czf "${PACKAGE_NAME}.tar.gz" "$PACKAGE_NAME"
     
     - name: Upload Linux artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: linux-release
         path: releases/v${{ env.VERSION }}/linux/*.tar.gz
@@ -85,7 +85,7 @@ jobs:
       contents: read
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     
     - name: Setup vcpkg
       run: |
